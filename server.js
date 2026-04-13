@@ -16,8 +16,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 const PORT = process.env.PORT || 3000;
 
 // ─── In-memory cart store ──────────────────────────────────────────────────
-// Holds cart data between "Pay with bKash" click and payment callback
-// { [pendingId]: { lineItems, customerEmail, customerPhone, amount, createdAt } }
 const pendingPayments = {};
 
 // Clean up entries older than 2 hours
@@ -111,7 +109,6 @@ app.get('/auth/callback', async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STEP 1: Cart page calls this → store cart in memory → return payment page URL
-// No draft orders — works on all Shopify plans
 // ─────────────────────────────────────────────────────────────────────────────
 app.post('/checkout/initiate', async (req, res) => {
   const { lineItems, customerEmail, customerPhone, amount, shippingAddress, shippingLine, payType, totalAmount, note, orderId, source } = req.body;
@@ -127,7 +124,7 @@ app.post('/checkout/initiate', async (req, res) => {
     const pendingId = crypto.randomBytes(12).toString('hex');
 
     pendingPayments[pendingId] = {
-      orderId,                          // existing Shopify order — just mark it paid
+      orderId,
       lineItems:     null,
       customerEmail: customerEmail || null,
       customerPhone: customerPhone || null,
@@ -164,7 +161,7 @@ app.post('/checkout/initiate', async (req, res) => {
     createdAt:       Date.now()
   };
 
-  console.log(`📋 Pending payment stored: ${pendingId}, Amount: ${amount} BDT`);
+  console.log(`📋 Pending payment stored: ${pendingId}, Amount: ${amount} BDT, Type: ${payType || 'full'}`);
 
   const paymentPageUrl = `${process.env.SERVER_URL}/pay?pendingId=${pendingId}&amount=${amount}&phone=${customerPhone || ''}`;
 
@@ -438,7 +435,6 @@ app.get('/bkash/callback', async (req, res) => {
 
       console.log(`💰 Payment! TrxID: ${trxID}, PendingID: ${pendingId}`);
 
-      // Get stored cart
       const pending = pendingPayments[pendingId];
 
       if (!pending) {
@@ -490,10 +486,21 @@ app.get('/bkash/callback', async (req, res) => {
 
       console.log(`✅ Shopify order created: #${order.order_number}`);
 
-      // If returnTo is set (cart flow), redirect back to cart with ?bkash=paid
-      const successUrl = pending.returnTo
-        ? pending.returnTo
-        : `https://${process.env.SHOPIFY_STORE_URL}/pages/payment-success?trxID=${trxID}&order=${order.order_number}`;
+      // ── Build redirect URL with payment type info ──────────────────────
+      // This lets the cart badge show "Full Paid" vs "Half bKash + COD due"
+      const payType = pending.payType || 'full';
+      const total   = parseFloat(pending.totalAmount || pending.amount) || 0;
+      const codAmt  = payType === 'half' ? Math.ceil(total / 2) : 0;
+
+      let successUrl;
+      if (pending.returnTo) {
+        // Strip any existing query string from the returnTo base URL
+        const returnBase = pending.returnTo.split('?')[0];
+        successUrl = `${returnBase}?bkash=paid&type=${payType}`;
+        if (payType === 'half' && codAmt > 0) successUrl += `&cod=${codAmt}`;
+      } else {
+        successUrl = `https://${process.env.SHOPIFY_STORE_URL}/pages/payment-success?trxID=${trxID}&order=${order.order_number}`;
+      }
 
       return res.redirect(successUrl);
 
