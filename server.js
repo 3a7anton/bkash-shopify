@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -15,7 +15,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
 
-// ─── In-memory cart store ──────────────────────────────────────────────────
+// â”€â”€â”€ In-memory cart store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Holds cart data between "Pay with bKash" click and payment callback
 // { [pendingId]: { lineItems, customerEmail, customerPhone, amount, createdAt } }
 const pendingPayments = {};
@@ -30,7 +30,7 @@ setInterval(() => {
   }
 }, 30 * 60 * 1000);
 
-// ─── Health Check ──────────────────────────────────────────────────────────
+// â”€â”€â”€ Health Check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.get('/', (req, res) => {
   res.json({
     status: 'running',
@@ -39,7 +39,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// ─── Test Shopify Token ────────────────────────────────────────────────────
+// â”€â”€â”€ Test Shopify Token â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.get('/test-shopify', async (req, res) => {
   try {
     const response = await axios.get(
@@ -56,7 +56,7 @@ app.get('/test-shopify', async (req, res) => {
       shop: response.data.shop.name,
       domain: response.data.shop.domain,
       plan: response.data.shop.plan_name,
-      message: '✅ Shopify token is working!'
+      message: 'âœ… Shopify token is working!'
     });
   } catch (error) {
     res.status(500).json({
@@ -66,7 +66,7 @@ app.get('/test-shopify', async (req, res) => {
   }
 });
 
-// ─── Shopify OAuth ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Shopify OAuth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.get('/auth', (req, res) => {
   const shop        = process.env.SHOPIFY_STORE_URL;
   const clientId    = process.env.SHOPIFY_API_KEY;
@@ -89,18 +89,18 @@ app.get('/auth/callback', async (req, res) => {
     });
 
     const accessToken = response.data.access_token;
-    console.log('✅ SHOPIFY TOKEN:', accessToken);
+    console.log('âœ… SHOPIFY TOKEN:', accessToken);
 
     res.send(`
       <html><body style="font-family:sans-serif;padding:40px;background:#f0f0f0;">
         <div style="background:white;padding:30px;border-radius:10px;max-width:600px;margin:0 auto;">
-          <h2 style="color:#00a650;">✅ App Installed!</h2>
+          <h2 style="color:#00a650;">âœ… App Installed!</h2>
           <p>Your Shopify Admin Token:</p>
           <div style="background:#f5f5f5;padding:15px;border-radius:5px;word-break:break-all;font-family:monospace;font-size:14px;">
             ${accessToken}
           </div>
           <br/>
-          <p style="color:red;font-weight:bold;">⚠️ Copy this token NOW and add to Railway as SHOPIFY_ADMIN_TOKEN</p>
+          <p style="color:red;font-weight:bold;">âš ï¸ Copy this token NOW and add to Railway as SHOPIFY_ADMIN_TOKEN</p>
         </div>
       </body></html>
     `);
@@ -109,9 +109,9 @@ app.get('/auth/callback', async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// THANK YOU PAGE: Shopify order already exists → store orderId → redirect to /pay
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// THANK YOU PAGE: Shopify order already exists â†’ store orderId â†’ redirect to /pay
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.post('/thankyou/initiate', async (req, res) => {
   const { orderId, orderName, amount, email, phone, source } = req.body;
 
@@ -131,17 +131,17 @@ app.post('/thankyou/initiate', async (req, res) => {
     createdAt:     Date.now()
   };
 
-  console.log(`📋 Thank-you pending stored: ${pendingId}, Order: ${orderName}, Amount: ${amount} BDT`);
+  console.log(`ðŸ“‹ Thank-you pending stored: ${pendingId}, Order: ${orderName}, Amount: ${amount} BDT`);
 
   const paymentPageUrl = `${process.env.SERVER_URL}/pay?pendingId=${pendingId}&amount=${parseFloat(amount).toFixed(2)}&phone=${phone || ''}`;
 
   res.json({ success: true, pendingId, amount, paymentPageUrl });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CART PAGE: store cart in memory → return payment page URL
-// No draft orders — works on all Shopify plans
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// CART PAGE: store cart in memory â†’ return payment page URL
+// No draft orders â€” works on all Shopify plans
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.post('/checkout/initiate', async (req, res) => {
   const { lineItems, customerEmail, customerPhone, amount, shippingAddress, shippingLine, payType, totalAmount, note } = req.body;
 
@@ -168,14 +168,14 @@ app.post('/checkout/initiate', async (req, res) => {
     createdAt:       Date.now()
   };
 
-  console.log(`📋 Pending payment stored: ${pendingId}, Amount: ${amount} BDT`);
+  console.log(`ðŸ“‹ Pending payment stored: ${pendingId}, Amount: ${amount} BDT`);
 
   const paymentPageUrl = `${process.env.SERVER_URL}/pay?pendingId=${pendingId}&amount=${amount}&phone=${customerPhone || ''}`;
 
   res.json({ success: true, pendingId, amount, paymentPageUrl });
 });
 
-// ─── Payment page (inline — no static file needed) ────────────────────────
+// â”€â”€â”€ Payment page (inline â€” no static file needed) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.get('/pay', (req, res) => {
   const { pendingId, amount, phone } = req.query;
   if (!pendingId || !amount) return res.status(400).send('Missing payment details');
@@ -256,7 +256,7 @@ app.get('/pay', (req, res) => {
     <small>Please complete payment in the bKash window</small>
   </div>
 
-  <div class="footer">🔒 Secured by SSL encryption</div>
+  <div class="footer">ðŸ”’ Secured by SSL encryption</div>
 </div>
 
 <script>
@@ -296,7 +296,7 @@ app.get('/pay', (req, res) => {
       spinner.style.display = 'none';
       btnText.textContent = 'Continue to bKash';
       statusMsg.className = 'status error';
-      statusMsg.textContent = '❌ ' + err.message;
+      statusMsg.textContent = 'âŒ ' + err.message;
     }
   }
 </script>
@@ -304,7 +304,7 @@ app.get('/pay', (req, res) => {
 </html>`);
 });
 
-// ─── STEP 2: /pay page calls this to start bKash ──────────────────────────
+// â”€â”€â”€ STEP 2: /pay page calls this to start bKash â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.post('/bkash/create', async (req, res) => {
   const { pendingId, amount, phone } = req.body;
 
@@ -316,20 +316,20 @@ app.post('/bkash/create', async (req, res) => {
     return res.status(400).json({ error: 'Payment session expired. Please go back and try again.' });
   }
 
-  // ── DUMMY MODE (no real bKash credentials yet) ─────────────────────────
+  // â”€â”€ DUMMY MODE (no real bKash credentials yet) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const isDummy = !process.env.BKASH_APP_KEY || process.env.BKASH_APP_KEY === 'your_app_key_here';
   if (isDummy) {
-    console.log(`🧪 DUMMY MODE: Simulating bKash payment for pending: ${pendingId}, amount: ${amount}`);
+    console.log(`ðŸ§ª DUMMY MODE: Simulating bKash payment for pending: ${pendingId}, amount: ${amount}`);
     return res.json({
       success:   true,
       paymentID: 'DUMMY_' + pendingId,
       bkashURL:  `${process.env.SERVER_URL}/bkash/dummy-payment?pendingId=${pendingId}&amount=${amount}&phone=${phone || ''}`
     });
   }
-  // ── END DUMMY MODE ─────────────────────────────────────────────────────
+  // â”€â”€ END DUMMY MODE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   try {
-    console.log(`🔄 Creating bKash payment for pending: ${pendingId}, amount: ${amount}`);
+    console.log(`ðŸ”„ Creating bKash payment for pending: ${pendingId}, amount: ${amount}`);
 
     const payment = await bkash.createPayment({
       amount,
@@ -344,7 +344,7 @@ app.post('/bkash/create', async (req, res) => {
       });
     }
 
-    console.log(`✅ bKash payment created. PaymentID: ${payment.paymentID}`);
+    console.log(`âœ… bKash payment created. PaymentID: ${payment.paymentID}`);
 
     res.json({
       success:   true,
@@ -358,7 +358,7 @@ app.post('/bkash/create', async (req, res) => {
   }
 });
 
-// ─── DUMMY bKash Payment Page (only active when no real API keys) ──────────
+// â”€â”€â”€ DUMMY bKash Payment Page (only active when no real API keys) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.get('/bkash/dummy-payment', (req, res) => {
   const { pendingId, amount, phone } = req.query;
   res.send(`<!DOCTYPE html>
@@ -385,16 +385,16 @@ app.get('/bkash/dummy-payment', (req, res) => {
 </head>
 <body>
 <div class="card">
-  <div class="badge">🧪 TEST MODE — Not a real bKash page</div>
+  <div class="badge">ðŸ§ª TEST MODE â€” Not a real bKash page</div>
   <h2>bKash Payment</h2>
-  <div class="amount">৳${parseFloat(amount).toFixed(2)} <span>BDT</span></div>
+  <div class="amount">à§³${parseFloat(amount).toFixed(2)} <span>BDT</span></div>
   <div class="info">
     Phone: <strong>${phone || 'N/A'}</strong><br/>
     This is a dummy payment page to test your Shopify order flow.<br/>
     Click <strong>Simulate Success</strong> to create a real order in your Shopify admin.
   </div>
-  <button class="btn btn-success" onclick="simulate('success')">✅ Simulate Success</button>
-  <button class="btn btn-fail" onclick="simulate('cancel')">❌ Simulate Cancel / Failure</button>
+  <button class="btn btn-success" onclick="simulate('success')">âœ… Simulate Success</button>
+  <button class="btn btn-fail" onclick="simulate('cancel')">âŒ Simulate Cancel / Failure</button>
   <div class="note">No real money is charged. For testing only.</div>
 </div>
 <script>
@@ -406,11 +406,11 @@ app.get('/bkash/dummy-payment', (req, res) => {
 </html>`);
 });
 
-// ─── STEP 3: bKash callback → execute → mark paid or create order ─────────
+// â”€â”€â”€ STEP 3: bKash callback â†’ execute â†’ mark paid or create order â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.get('/bkash/callback', async (req, res) => {
   const { paymentID, status } = req.query;
 
-  console.log(`📩 bKash callback: PaymentID=${paymentID}, Status=${status}`);
+  console.log(`ðŸ“© bKash callback: PaymentID=${paymentID}, Status=${status}`);
 
   if (status === 'cancel' || status === 'failure') {
     return res.redirect(
@@ -422,13 +422,13 @@ app.get('/bkash/callback', async (req, res) => {
     try {
       let trxID, amount, pendingId;
 
-      // ── DUMMY MODE ────────────────────────────────────────────────────
+      // â”€â”€ DUMMY MODE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       if (paymentID && paymentID.startsWith('DUMMY_')) {
         pendingId = paymentID.replace('DUMMY_', '');
         trxID  = 'TEST' + Date.now();
-        console.log(`🧪 DUMMY MODE: Simulating successful payment. TrxID: ${trxID}`);
+        console.log(`ðŸ§ª DUMMY MODE: Simulating successful payment. TrxID: ${trxID}`);
       } else {
-      // ── REAL bKash ────────────────────────────────────────────────────
+      // â”€â”€ REAL bKash â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         const execution = await bkash.executePayment(paymentID);
         if (execution.statusCode !== '0000') {
           console.error('Execute failed:', execution.statusMessage);
@@ -438,9 +438,9 @@ app.get('/bkash/callback', async (req, res) => {
         amount    = execution.amount;
         pendingId = execution.merchantInvoiceNumber;
       }
-      // ── END MODE SPLIT ────────────────────────────────────────────────
+      // â”€â”€ END MODE SPLIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-      console.log(`💰 Payment! TrxID: ${trxID}, PendingID: ${pendingId}`);
+      console.log(`ðŸ’° Payment! TrxID: ${trxID}, PendingID: ${pendingId}`);
 
       // Get stored cart
       const pending = pendingPayments[pendingId];
@@ -455,9 +455,9 @@ app.get('/bkash/callback', async (req, res) => {
       // In dummy mode, use stored amount
       if (!amount) amount = pending.amount;
 
-      // ── THANK YOU PAGE FLOW: mark existing order as paid ────────────
+      // â”€â”€ THANK YOU PAGE FLOW: mark existing order as paid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       if (pending.source === 'thankyou_page') {
-        console.log(`📦 Thank-you flow: marking order ${pending.shopifyOrderId} as paid`);
+        console.log(`ðŸ“¦ Thank-you flow: marking order ${pending.shopifyOrderId} as paid`);
 
         await shopify.markOrderAsPaid(
           pending.shopifyOrderId,
@@ -467,14 +467,14 @@ app.get('/bkash/callback', async (req, res) => {
 
         delete pendingPayments[pendingId];
 
-        console.log(`✅ Order ${pending.orderName} marked as paid! TrxID: ${trxID}`);
+        console.log(`âœ… Order ${pending.orderName} marked as paid! TrxID: ${trxID}`);
 
         return res.redirect(
           `https://${process.env.SHOPIFY_STORE_URL}/pages/payment-success?trxID=${trxID}&order=${pending.orderName}`
         );
       }
 
-      // ── CART FLOW: create a new Shopify order ─────────────────────────
+      // â”€â”€ CART FLOW: create a new Shopify order â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const order = await shopify.createOrder({
         lineItems:       pending.lineItems,
         customerEmail:   pending.customerEmail,
@@ -490,7 +490,7 @@ app.get('/bkash/callback', async (req, res) => {
 
       delete pendingPayments[pendingId];
 
-      console.log(`✅ Shopify order created: #${order.order_number}`);
+      console.log(`âœ… Shopify order created: #${order.order_number}`);
 
       return res.redirect(
         `https://${process.env.SHOPIFY_STORE_URL}/pages/payment-success?trxID=${trxID}&order=${order.order_number}`
@@ -507,7 +507,7 @@ app.get('/bkash/callback', async (req, res) => {
   res.status(400).json({ error: 'Unknown status' });
 });
 
-// ─── Query Payment Status ──────────────────────────────────────────────────
+// â”€â”€â”€ Query Payment Status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.get('/bkash/status/:paymentID', async (req, res) => {
   try {
     const status = await bkash.queryPayment(req.params.paymentID);
@@ -517,15 +517,15 @@ app.get('/bkash/status/:paymentID', async (req, res) => {
   }
 });
 
-// ─── PAY ORDER PAGE (Checkout Blocks button links here) ────────────────────
-// Customer enters order number → server looks it up → redirects to bKash
+
+// --- PAY ORDER PAGE (Checkout Blocks button links here) ---
 app.get('/pay-order', (req, res) => {
   res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Complete bKash Payment — Stickify</title>
+  <title>Complete bKash Payment</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -535,14 +535,13 @@ app.get('/pay-order', (req, res) => {
     .header h1{color:white;font-size:20px;font-weight:600;margin-bottom:4px}
     .header p{color:rgba(255,255,255,0.8);font-size:13px}
     .body{padding:28px 32px}
-    .step{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;font-size:13px;color:#666;line-height:1.5}
-    .step-num{background:#e2136e;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+    .info-box{background:#fff5f9;border:1.5px solid #fce4ef;border-radius:12px;padding:16px;margin-bottom:24px;font-size:13px;color:#666;line-height:1.6;text-align:center}
+    .info-box strong{color:#e2136e}
     .field{margin-bottom:20px}
     .field label{display:block;font-size:13px;font-weight:500;color:#444;margin-bottom:7px}
-    .field input{width:100%;padding:13px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:16px;font-family:inherit;outline:none;transition:border-color 0.2s;text-align:center;letter-spacing:1px;font-weight:600}
+    .field input{width:100%;padding:13px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:15px;font-family:inherit;outline:none;transition:border-color 0.2s}
     .field input:focus{border-color:#e2136e}
-    .field input::placeholder{font-weight:400;letter-spacing:0;color:#bbb}
-    .hint{font-size:11px;color:#999;margin-top:6px;text-align:center}
+    .field input::placeholder{color:#bbb}
     .btn{width:100%;background:#e2136e;color:white;border:none;border-radius:12px;padding:15px;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s}
     .btn:hover{background:#c0115c}
     .btn:disabled{background:#f0aac8;cursor:not-allowed}
@@ -550,208 +549,99 @@ app.get('/pay-order', (req, res) => {
     @keyframes spin{to{transform:rotate(360deg)}}
     .status{margin-top:14px;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:500;display:none}
     .status.error{background:#fff0f0;color:#c00;border:1px solid #ffd0d0;display:block}
-    .status.success{background:#f0fff0;color:#080;border:1px solid #d0ffd0;display:block}
+    .order-found{margin-top:20px;background:#f8f8f8;border:1.5px solid #e0e0e0;border-radius:12px;padding:18px;display:none}
+    .order-found h3{font-size:14px;color:#333;margin-bottom:10px}
+    .order-row{display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:6px}
+    .order-row .val{font-weight:600;color:#333}
+    .order-amount{font-size:24px;font-weight:700;color:#e2136e;text-align:center;margin:14px 0}
     .footer{padding:16px 32px 24px;text-align:center;font-size:12px;color:#bbb}
   </style>
 </head>
 <body>
 <div class="card">
-  <div class="header">
-    <h1>Complete bKash Payment</h1>
-    <p>Enter your order number to pay via bKash</p>
-  </div>
+  <div class="header"><h1>Complete bKash Payment</h1><p>Pay for your pending order via bKash</p></div>
   <div class="body">
-    <div class="step">
-      <div class="step-num">1</div>
-      <div>Find your <strong>order number</strong> on the Thank You page or confirmation email (e.g. <strong>#1001</strong>)</div>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div>Enter it below and click <strong>Pay Now</strong></div>
-    </div>
-
-    <div class="field">
-      <label for="order-input">Order / Confirmation Code</label>
-      <input type="text" id="order-input" placeholder="e.g. GDGWKNDZX" autofocus />
-      <div class="hint">Enter the code shown on your Thank You page or confirmation email</div>
-    </div>
-
-    <button class="btn" id="pay-btn" onclick="lookupOrder()">
-      <span id="btn-text">Pay Now with bKash</span>
-      <div class="spinner" id="spinner"></div>
-    </button>
-
+    <div class="info-box">Enter the <strong>email address</strong> you used during checkout.<br/>We will find your pending order automatically.</div>
+    <div class="field"><label for="email-input">Email Address</label><input type="email" id="email-input" placeholder="your@email.com" autofocus /></div>
+    <button class="btn" id="find-btn" onclick="findOrder()"><span id="btn-text">Find My Order</span><div class="spinner" id="spinner"></div></button>
     <div class="status" id="status-msg"></div>
+    <div class="order-found" id="order-found">
+      <h3>Pending Order Found</h3>
+      <div class="order-row"><span>Order</span><span class="val" id="found-name"></span></div>
+      <div class="order-row"><span>Status</span><span class="val" style="color:#e2136e">Payment Pending</span></div>
+      <div class="order-amount" id="found-amount"></div>
+      <button class="btn" onclick="proceedToPayment()" style="margin-top:8px">Pay Now with bKash</button>
+    </div>
   </div>
-  <div class="footer">🔒 Secured by SSL encryption • Stickify</div>
+  <div class="footer">Secured by SSL encryption - Stickify</div>
 </div>
-
 <script>
-  async function lookupOrder() {
-    var input = document.getElementById('order-input').value.trim();
-    var btn = document.getElementById('pay-btn');
+  var foundPaymentUrl = null;
+  async function findOrder() {
+    var email = document.getElementById('email-input').value.trim();
+    var btn = document.getElementById('find-btn');
     var spinner = document.getElementById('spinner');
     var btnText = document.getElementById('btn-text');
     var statusMsg = document.getElementById('status-msg');
-
-    if (!input) {
-      statusMsg.className = 'status error';
-      statusMsg.textContent = 'Please enter your order number';
-      return;
-    }
-
-    // Clean up input — remove # prefix and extra spaces, keep letters and numbers
-    var orderNumber = input.replace(/^#/, '').trim();
-    if (!orderNumber) {
-      statusMsg.className = 'status error';
-      statusMsg.textContent = 'Please enter a valid order code';
-      return;
-    }
-
-    statusMsg.className = 'status';
-    statusMsg.style.display = 'none';
-    btn.disabled = true;
-    spinner.style.display = 'block';
-    btnText.textContent = 'Looking up order...';
-
+    var orderFound = document.getElementById('order-found');
+    if (!email || !email.includes('@')) { statusMsg.className = 'status error'; statusMsg.textContent = 'Please enter a valid email address'; return; }
+    statusMsg.className = 'status'; statusMsg.style.display = 'none'; orderFound.style.display = 'none';
+    btn.disabled = true; spinner.style.display = 'block'; btnText.textContent = 'Searching...';
     try {
-      var res = await fetch('/pay-order/lookup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderNumber: orderNumber })
-      });
-
+      var res = await fetch('/pay-order/lookup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email }) });
       var data = await res.json();
-
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Order not found');
-      }
-
-      statusMsg.className = 'status success';
-      statusMsg.textContent = 'Order found! Redirecting to payment...';
-
-      setTimeout(function() {
-        window.location.href = data.paymentPageUrl;
-      }, 500);
-
+      if (!res.ok || !data.success) throw new Error(data.error || 'No pending order found');
+      document.getElementById('found-name').textContent = data.orderName;
+      document.getElementById('found-amount').textContent = 'BDT ' + parseFloat(data.amount).toFixed(2);
+      orderFound.style.display = 'block'; foundPaymentUrl = data.paymentPageUrl;
+      btn.disabled = false; spinner.style.display = 'none'; btnText.textContent = 'Find My Order';
     } catch (err) {
-      btn.disabled = false;
-      spinner.style.display = 'none';
-      btnText.textContent = 'Pay Now with bKash';
-      statusMsg.className = 'status error';
-      statusMsg.textContent = '⚠️ ' + err.message;
+      btn.disabled = false; spinner.style.display = 'none'; btnText.textContent = 'Find My Order';
+      statusMsg.className = 'status error'; statusMsg.textContent = err.message;
     }
   }
-
-  // Allow Enter key to submit
-  document.getElementById('order-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') lookupOrder();
-  });
+  function proceedToPayment() { if (foundPaymentUrl) window.location.href = foundPaymentUrl; }
+  document.getElementById('email-input').addEventListener('keypress', function(e) { if (e.key === 'Enter') findOrder(); });
 </script>
 </body>
 </html>`);
 });
 
-// ─── PAY ORDER LOOKUP (find order by number → create pending → redirect) ───
+// --- PAY ORDER LOOKUP (find unpaid order by email) ---
 app.post('/pay-order/lookup', async (req, res) => {
-  const { orderNumber } = req.body;
-
-  if (!orderNumber) {
-    return res.status(400).json({ error: 'Order code is required' });
-  }
-
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email address is required' });
   try {
-    // Clean the input — remove # prefix
-    const cleanCode = orderNumber.replace(/^#/, '').trim().toUpperCase();
-    console.log(`🔍 Looking up order: ${cleanCode}`);
-
-    const headers = {
-      'X-Shopify-Access-Token': process.env.SHOPIFY_ADMIN_TOKEN,
-      'Content-Type': 'application/json'
-    };
-
-    let order = null;
-
-    // Strategy 1: Search by name (handles both #1001 and #GDGWKNDZX formats)
-    const nameSearch = await axios.get(
-      `https://${process.env.SHOPIFY_STORE_URL}/admin/api/2024-01/orders.json?name=${encodeURIComponent(cleanCode)}&status=any&limit=5`,
-      { headers }
+    console.log('Looking up unpaid orders for: ' + email);
+    const response = await axios.get(
+      'https://' + process.env.SHOPIFY_STORE_URL + '/admin/api/2024-01/orders.json?email=' + encodeURIComponent(email) + '&financial_status=pending&status=any&limit=5&order=created_at+desc',
+      { headers: { 'X-Shopify-Access-Token': process.env.SHOPIFY_ADMIN_TOKEN, 'Content-Type': 'application/json' } }
     );
-
-    if (nameSearch.data.orders && nameSearch.data.orders.length > 0) {
-      // Find exact match (case-insensitive)
-      order = nameSearch.data.orders.find(o => 
-        o.name.replace(/^#/, '').toUpperCase() === cleanCode
-      ) || nameSearch.data.orders[0];
+    const orders = response.data.orders;
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ error: 'No pending payment found for this email.' });
     }
-
-    // Strategy 2: If not found by name, search recent orders and match confirmation number
-    if (!order) {
-      console.log(`🔍 Not found by name, searching recent orders...`);
-      const recentSearch = await axios.get(
-        `https://${process.env.SHOPIFY_STORE_URL}/admin/api/2024-01/orders.json?status=any&limit=50&order=created_at+desc`,
-        { headers }
-      );
-
-      if (recentSearch.data.orders) {
-        order = recentSearch.data.orders.find(o => {
-          // Match by order name, confirmation number, or order number
-          const name = (o.name || '').replace(/^#/, '').toUpperCase();
-          const confNum = (o.confirmation_number || '').toUpperCase();
-          return name === cleanCode || confNum === cleanCode || String(o.order_number) === cleanCode;
-        });
-      }
-    }
-
-    if (!order) {
-      return res.status(404).json({ error: `Order "${cleanCode}" not found. Please check the code on your Thank You page and try again.` });
-    }
-
-    // Check if order is already paid
-    if (order.financial_status === 'paid') {
-      return res.status(400).json({ error: `Order ${order.name} is already paid! No payment needed.` });
-    }
-
-    // Get the total amount
+    const order = orders[0];
     const amount = parseFloat(order.total_price).toFixed(2);
-    const email = order.email || '';
-    const phone = order.phone || order.shipping_address?.phone || '';
-
-    // Store in pendingPayments
+    const phone = order.phone || (order.shipping_address && order.shipping_address.phone) || '';
     const pendingId = crypto.randomBytes(12).toString('hex');
-
     pendingPayments[pendingId] = {
-      source:         'thankyou_page',
-      shopifyOrderId: order.id,
-      orderName:      order.name,
-      amount:         amount,
-      customerEmail:  email,
-      customerPhone:  phone,
-      createdAt:      Date.now()
+      source: 'thankyou_page', shopifyOrderId: order.id, orderName: order.name,
+      amount: amount, customerEmail: email, customerPhone: phone, createdAt: Date.now()
     };
-
-    console.log(`✅ Order found: ${order.name} (confirmation: ${order.confirmation_number}), Amount: ৳${amount}, Status: ${order.financial_status}`);
-
-    const paymentPageUrl = `/pay?pendingId=${pendingId}&amount=${amount}&phone=${phone}`;
-
-    res.json({
-      success: true,
-      orderName: order.name,
-      amount,
-      financialStatus: order.financial_status,
-      paymentPageUrl
-    });
-
+    console.log('Order found: ' + order.name + ', Amount: ' + amount);
+    res.json({ success: true, orderName: order.name, amount: amount, financialStatus: order.financial_status,
+      paymentPageUrl: '/pay?pendingId=' + pendingId + '&amount=' + amount + '&phone=' + phone });
   } catch (error) {
-    console.error('Order lookup error:', error.response?.data || error.message);
+    console.error('Order lookup error:', error.response ? error.response.data : error.message);
     res.status(500).json({ error: 'Failed to look up order. Please try again.' });
   }
 });
 
-// ─── Start Server ──────────────────────────────────────────────────────────
+// --- Start Server ---
 app.listen(PORT, () => {
-  console.log(`🚀 Stickify bKash server running on port ${PORT}`);
-  console.log(`📡 Callback URL: ${process.env.SERVER_URL}/bkash/callback`);
-  console.log(`💳 Payment Page: ${process.env.SERVER_URL}/pay`);
-  console.log(`🧾 Pay Order: ${process.env.SERVER_URL}/pay-order`);
+  console.log('Stickify bKash server running on port ' + PORT);
+  console.log('Callback URL: ' + process.env.SERVER_URL + '/bkash/callback');
+  console.log('Payment Page: ' + process.env.SERVER_URL + '/pay');
+  console.log('Pay Order: ' + process.env.SERVER_URL + '/pay-order');
 });
