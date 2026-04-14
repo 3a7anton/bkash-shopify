@@ -11,7 +11,7 @@ function getHeaders() {
 
 // ─── Create Order Directly (after successful bKash payment) ───────────────
 // This creates a real paid order — no draft order needed
-async function createOrder({ lineItems, customerEmail, customerPhone, shippingAddress, shippingLine, payType, totalAmount, note, amount, trxID }) {
+async function createOrder({ lineItems, customerEmail, customerPhone, customerName, shippingAddress, shippingLine, payType, totalAmount, note, amount, trxID }) {
   try {
     const isHalf   = payType === 'half';
     const orderNote = note || `bKash payment confirmed. TrxID: ${trxID}`;
@@ -43,8 +43,15 @@ async function createOrder({ lineItems, customerEmail, customerPhone, shippingAd
 
     if (customerEmail)   orderBody.order.email = customerEmail;
     if (customerPhone)   orderBody.order.phone = customerPhone;
+    if (customerName)    orderBody.order.note_attributes = [{ name: 'Customer Name', value: customerName }];
 
     if (shippingAddress) {
+      // Fill name fields from customerName if not provided
+      if (customerName && !shippingAddress.first_name) {
+        const parts = customerName.trim().split(' ');
+        shippingAddress.first_name = parts[0] || '';
+        shippingAddress.last_name  = parts.slice(1).join(' ') || '';
+      }
       orderBody.order.shipping_address = shippingAddress;
       orderBody.order.billing_address  = shippingAddress;
     }

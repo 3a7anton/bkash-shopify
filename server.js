@@ -111,7 +111,7 @@ app.get('/auth/callback', async (req, res) => {
 // STEP 1: Cart page calls this → store cart in memory → return payment page URL
 // ─────────────────────────────────────────────────────────────────────────────
 app.post('/checkout/initiate', async (req, res) => {
-  const { lineItems, customerEmail, customerPhone, amount, shippingAddress, shippingLine, payType, totalAmount, note, orderId, source } = req.body;
+  const { lineItems, customerEmail, customerPhone, customerName, amount, shippingAddress, shippingLine, payType, totalAmount, note, orderId, source } = req.body;
 
   if (!amount || isNaN(parseFloat(amount))) {
     return res.status(400).json({ error: 'amount is required' });
@@ -148,6 +148,7 @@ app.post('/checkout/initiate', async (req, res) => {
 
   pendingPayments[pendingId] = {
     lineItems,
+    customerName:    customerName || null,
     customerEmail:   customerEmail || null,
     customerPhone:   customerPhone || null,
     amount:          parseFloat(amount).toFixed(2),
@@ -156,7 +157,6 @@ app.post('/checkout/initiate', async (req, res) => {
     payType:         payType || 'full',
     totalAmount:     totalAmount || amount,
     note:            note || null,
-    returnTo:        req.body.returnTo || null,
     source:          'custom_checkout',
     createdAt:       Date.now()
   };
@@ -471,6 +471,7 @@ app.get('/bkash/callback', async (req, res) => {
 
       order = await shopify.createOrder({
         lineItems:       pending.lineItems,
+        customerName:    pending.customerName,
         customerEmail:   pending.customerEmail,
         customerPhone:   pending.customerPhone,
         shippingAddress: pending.shippingAddress,
@@ -492,15 +493,8 @@ app.get('/bkash/callback', async (req, res) => {
       const total   = parseFloat(pending.totalAmount || pending.amount) || 0;
       const codAmt  = payType === 'half' ? Math.ceil(total / 2) : 0;
 
-      let successUrl;
-      if (pending.returnTo) {
-        // Strip any existing query string from the returnTo base URL
-        const returnBase = pending.returnTo.split('?')[0];
-        successUrl = `${returnBase}?bkash=paid&type=${payType}`;
-        if (payType === 'half' && codAmt > 0) successUrl += `&cod=${codAmt}`;
-      } else {
-        successUrl = `https://${process.env.SHOPIFY_STORE_URL}/pages/payment-success?trxID=${trxID}&order=${order.order_number}`;
-      }
+      const nameParam  = encodeURIComponent(pending.customerName || '');
+      const successUrl = `${process.env.SERVER_URL}/payment-success?trxID=${trxID}&order=${order.order_number}&amount=${amount}&name=${nameParam}&type=${payType}${codAmt > 0 ? '&cod=' + codAmt : ''}`;
 
       return res.redirect(successUrl);
 
@@ -513,6 +507,104 @@ app.get('/bkash/callback', async (req, res) => {
   }
 
   res.status(400).json({ error: 'Unknown status' });
+});
+
+// ─── Order Confirmation Page ───────────────────────────────────────────────
+app.get('/payment-success', (req, res) => {
+  const storeUrl = `https://${process.env.SHOPIFY_STORE_URL}`;
+  res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Confirmed — Stickify</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:#f0f4f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .card{background:white;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,0.10);width:100%;max-width:480px;overflow:hidden}
+    .header{background:linear-gradient(135deg,#00c853 0%,#00a040 100%);padding:40px 32px;text-align:center}
+    .check-circle{width:80px;height:80px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;animation:pop 0.5s cubic-bezier(0.175,0.885,0.32,1.275)}
+    @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+    .check-icon{font-size:42px;line-height:1}
+    .header h1{color:white;font-size:24px;font-weight:700;margin-bottom:6px}
+    .header p{color:rgba(255,255,255,0.85);font-size:14px}
+    .body{padding:28px 32px}
+    .row{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid #f5f5f5}
+    .row:last-of-type{border-bottom:none}
+    .row-label{font-size:13px;color:#888;font-weight:500}
+    .row-value{font-size:14px;color:#111;font-weight:600;text-align:right;max-width:65%}
+    .row.amount-row .row-value{font-size:22px;color:#00a040;font-weight:700}
+    .trx-badge{font-family:monospace;font-size:12px;background:#f5f5f5;padding:4px 8px;border-radius:5px;word-break:break-all}
+    .cod-box{background:#fff8e1;border:1.5px solid #ffe082;border-radius:12px;padding:16px 18px;margin-top:16px}
+    .cod-box h3{font-size:13px;font-weight:600;color:#e65100;margin-bottom:6px}
+    .cod-box p{font-size:13px;color:#795548;line-height:1.5}
+    .cod-amount{font-size:24px;font-weight:700;color:#e65100;margin-top:8px}
+    .btn-shop{display:block;width:100%;background:#e2136e;color:white;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;text-align:center;text-decoration:none;margin-top:22px;transition:background 0.2s}
+    .btn-shop:hover{background:#c0115c}
+    .footer-note{padding:16px 32px 24px;text-align:center;font-size:12px;color:#bbb}
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="check-circle"><span class="check-icon">✅</span></div>
+    <h1>Order Confirmed!</h1>
+    <p id="hdr-sub">bKash payment successful</p>
+  </div>
+  <div class="body">
+    <div class="row" id="row-name" style="display:none">
+      <span class="row-label">Customer</span>
+      <span class="row-value" id="val-name"></span>
+    </div>
+    <div class="row">
+      <span class="row-label">Order Number</span>
+      <span class="row-value" id="val-order"></span>
+    </div>
+    <div class="row amount-row">
+      <span class="row-label">Paid via bKash</span>
+      <span class="row-value" id="val-amount"></span>
+    </div>
+    <div class="row">
+      <span class="row-label">Transaction ID</span>
+      <span class="row-value"><span class="trx-badge" id="val-trx"></span></span>
+    </div>
+    <div id="cod-section" style="display:none">
+      <div class="cod-box">
+        <h3>💵 Pay on Delivery</h3>
+        <p>You paid 50% via bKash. The remaining amount is due when your order arrives.</p>
+        <div class="cod-amount" id="val-cod"></div>
+      </div>
+    </div>
+    <a href="${storeUrl}" class="btn-shop">← Continue Shopping</a>
+  </div>
+  <div class="footer-note">🔒 Secured payment via bKash Gateway</div>
+</div>
+<script>
+  (function() {
+    var p   = new URLSearchParams(window.location.search);
+    var trxID  = p.get('trxID')  || 'N/A';
+    var order  = p.get('order')  || 'N/A';
+    var amount = p.get('amount') || '0';
+    var name   = p.get('name')   || '';
+    var type   = p.get('type')   || 'full';
+    var cod    = p.get('cod')    || '0';
+    document.getElementById('val-trx').textContent   = trxID;
+    document.getElementById('val-order').textContent = '#' + order;
+    document.getElementById('val-amount').textContent= '\u09F3' + parseFloat(amount).toFixed(2);
+    if (name) {
+      document.getElementById('val-name').textContent   = decodeURIComponent(name);
+      document.getElementById('row-name').style.display = 'flex';
+    }
+    if (type === 'half' && parseFloat(cod) > 0) {
+      document.getElementById('cod-section').style.display = 'block';
+      document.getElementById('val-cod').textContent       = '\u09F3' + parseFloat(cod).toFixed(2);
+      document.getElementById('hdr-sub').textContent       = 'Partial payment confirmed — COD due on delivery';
+    }
+  })();
+</script>
+</body>
+</html>`);
 });
 
 // ─── Query Payment Status ──────────────────────────────────────────────────
